@@ -1,0 +1,19 @@
+{
+  "name": "city-wechat",
+  "version": "1.0.0",
+  "description": "城市生活账本：用数据看城市，用故事讲普通人的生活选择。提前排好一周内容，生成蓝色数据风封面+文内图，进草稿箱，每周二/四/日定时发送。",
+  "type": "module",
+  "scripts": {
+    "token": "node src/token.js",
+    "upload:week": "node src/publish.js --upload-week",
+    "rebuild:week": "node src/publish.js --upload-week --rebuild",
+    "list:drafts": "node src/publish.js --list-drafts",
+    "status": "node src/publish.js --status",
+    "schedule": "node src/scheduler.js",
+    "publish:now": "node src/scheduler.js --now"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-cron": "^3.0.3"
+  }
+}

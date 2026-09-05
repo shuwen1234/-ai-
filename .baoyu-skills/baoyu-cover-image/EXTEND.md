@@ -6,17 +6,17 @@ watermark:
   content: ""
   position: bottom-right
 
-preferred_type: conceptual
+preferred_type: typography
 
-preferred_palette: cool
+preferred_palette: null
 
-preferred_rendering: digital
+preferred_rendering: flat-vector
 
 preferred_text: title-only
 
-preferred_mood: balanced
+preferred_mood: bold
 
-default_aspect: "2.35:1"
+default_aspect: "5:2"
 
 quick_mode: false
 
@@ -59,10 +59,13 @@ node scripts/imggen.mjs --prompt "<拼好的英文/中文 prompt>" --image image
 - `--image` 输出路径；父目录自动创建。建议统一放 `images/covers/`。
 - 成功打印 `✅ <path> (<size>)` 且退出码 0；失败会回退一张蓝色渐变占位图并以退出码 1 提示。
 
-## 默认取向
+## 默认取向（高级概念海报）
 
-- **类型** conceptual：抽象表达文章核心观点（比 hero 更克制，契合数据账号调性）。
-- **配色** cool：工程蓝 / 藏蓝 / 青，和账号主视觉一致；需要更强品牌感时可指定自定义调色板 `city-blue`。
-- **渲染** digital：干净精确的边缘、细腻渐变，贴合信息图质感。
-- **文字** title-only：只保留主标题，避免封面过载。
-- **宽高比** 2.35:1：适合公众号文章头图与分享卡。
+封面是**高级平面概念海报**，不是普通插画、不是简单字效：
+
+- **主文字为核心**：文章主标题（或指定短文案）必须最大、最醒目、居视觉中心，简体中文、不得乱码/错字/裁切。
+- **元素服务含义**：理解主题的含义/情绪/隐喻/传播张力，自选视觉关系（连接/压迫/撕裂/托举/照亮/上升/坠落…）表达，不做无意义装饰。
+- **不套模板**：`preferred_palette: null` 让配色随主题自由决定；只保留最必要、最有含义的元素。
+- **类型** typography：文字主导版式，契合"主文字即画面核心"。
+- **情绪** bold：强视觉冲击与记忆点。
+- **宽高比** 5:2：横向高级海报，适合公众号头图与分享卡。

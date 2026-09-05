@@ -140,23 +140,31 @@ function extractDataHint(body = '') {
   return { metric, pairs }
 }
 
-function buildPrompts({ title, weekday, type, body = '' }) {
-  // 高级城市插画 + 科技感：现代都市 + 数据可视化 + 未来科技质感
-  const style = '高级现代城市插画风格，融入科技感与数据可视化元素：发光的数据流、半透明数据面板、全息投影质感、精致的等距(isometric)城市建筑或城市天际线，主色为深蓝到亮蓝的渐变（藏蓝、钢蓝、青蓝）点缀霓虹青色高光，光影层次丰富，画面干净大气有未来科技氛围，电影级质感'
-  const textRule = '画面中的文字必须清晰、正确、排版精致美观，全部使用简体中文，不得出现乱码或错字'
+function buildPrompts({ title, weekday, type, body = '', coverText = '', coverConcept = '' }) {
+  // 概念海报通用规则：文字为核心、元素服务含义、不套模板、克制印刷质感
+  const textRule = '画面中所有文字必须清晰、正确、排版精致，全部使用简体中文，字号大、有合理内边距，绝不允许乱码、错字、裁切或难以辨认'
+  const posterRule = '这是一张高级平面概念海报，不是普通插画也不是简单字效：整体要有强烈的概念感、克制的印刷质感、极简有力、有记忆点；只保留最必要、最有含义的元素，元素必须服务于文字含义而非装饰；不套固定模板，配色随主题自由决定但要统一、清晰、有冲击力'
 
-  const cover = `为公众号城市数据类文章设计高级封面插画。以现代都市天际线或等距城市建筑为主体，叠加发光的数据网格、图表与光点，营造科技感与数据洞察氛围。在画面显著位置以精致的现代字体排版嵌入中文主标题「${title}」（可分两行居中或靠上排布，作为封面大标题）。${style}。${textRule}。构图大气，主标题醒目易读。`
+  // 封面主文字：优先用 md 指定的短文案，否则回退到标题
+  const mainText = (coverText || title).trim()
+  // 视觉概念/关系：优先用 md 指定，否则给一个开放引导
+  const concept = coverConcept
+    ? `视觉概念：${coverConcept}。`
+    : '请理解主题背后的含义、情绪、隐喻与传播张力，自选最准确的视觉关系（连接/扩散/压迫/穿越/托举/撕裂/照亮/分裂/融合/对抗/聚焦/距离/上升/坠落等）来表达。'
+
+  const cover = `设计一张 5:2 横向高级概念海报（公众号头图）。主题：${title}。${concept} 画面核心主文字为「${mainText}」——必须最大、最醒目、居于视觉中心，一眼可读。${posterRule}。${textRule}。`
 
   const data = extractDataHint(body)
   let inline1
   if (data) {
-    // 有真实数据：做成带中文标签与数值的信息图
-    inline1 = `高级城市数据信息图插画：用发光的全息柱状图/数据面板，清晰展示「${data.metric}」的对比数据 —— ${data.pairs.join('，')}。每个数据点都配上对应的中文标签与数值，数字醒目准确。等距现代都市作背景，${style}。${textRule}。`
+    // 有真实数据：概念化的数据可视化海报
+    inline1 = `设计一张数据可视化概念海报（横向）。用克制有力的图形（柱状/对比块/占比/流向）清晰呈现「${data.metric}」的对比：${data.pairs.join('，')}。每个数据点配对应中文标签与数值，直观易懂、数字准确醒目。${posterRule}。${textRule}。`
   } else {
-    inline1 = `高级城市数据信息图插画：等距现代都市，多座城市之间由发光的数据线连接，上方悬浮半透明的柱状图与数据面板，并标注「${type || '城市对比'}」等简短中文栏目标签，表现城市之间的对比，${style}。${textRule}。`
+    inline1 = `设计一张数据可视化概念海报（横向），主题「${type || title}」。用克制有力的图形（对比/趋势/流向/占比）把该主题的核心关系可视化，配简短准确的中文标签，直观易懂。${posterRule}。${textRule}。`
   }
 
-  const inline2 = `高级城市插画：一个人站在城市夜景前，面前是发光的全息数据界面，界面上以简短中文文字点明主题「${title}」的关键信息（如关键词或一句话结论），并有房子、硬币、路径等生活选择图标，表现普通人在城市中的决策，科技感与人文氛围兼具，${style}。${textRule}。`
+  // 第二张：概念化表达文章的核心矛盾/结论，可含少量关键数据
+  const inline2 = `设计一张概念海报式插图（横向），承接文章「${title}」的核心结论或矛盾。用尺度反差、光影或象征元素表达普通人在城市中的选择与代价，画面中以简短中文点出关键结论或关键词，可搭配一两个关键数字。${posterRule}。${textRule}。`
 
   return { cover, inline1, inline2 }
 }
@@ -181,13 +189,14 @@ export function clearImageCache(weekday) {
 }
 
 // ====== 生成/复用 3 张图，返回 data URI ======
-export async function ensureImages({ title, weekday, type, body = '' }) {
+export async function ensureImages({ title, weekday, type, body = '', coverText = '', coverConcept = '' }) {
   const paths = cachePaths(weekday)
-  const prompts = buildPrompts({ title, weekday, type, body })
+  const prompts = buildPrompts({ title, weekday, type, body, coverText, coverConcept })
   const out = {}
 
+  // 封面 5:2 横向概念海报；文内图横向
   const jobs = [
-    ['cover', prompts.cover, '1536x1024'],
+    ['cover', prompts.cover, '1536x614'],
     ['inline1', prompts.inline1, '1536x1024'],
     ['inline2', prompts.inline2, '1536x1024']
   ]

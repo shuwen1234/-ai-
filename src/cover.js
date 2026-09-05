@@ -15,5 +15,6 @@ const PALETTES = {
 
 export function generateCover(weekday) {
   const [top, bottom] = PALETTES[weekday] || PALETTES.周一
-  return generateGradientPng(900, 500, top, bottom)
+  // 5:2 横向，与概念海报封面比例一致
+  return generateGradientPng(1500, 600, top, bottom)
 }

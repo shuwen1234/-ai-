@@ -84,6 +84,14 @@ async function listDrafts(offset = 0, count = 20) {
 }
 
 // ====== 文章加载 ======
+// 剥离「## 封面与配图要求」及其后内容——这是给出图/人工用的配置说明，
+// 不属于读者可见正文。出图逻辑只读 frontmatter 与正文表格，故剥离不影响配图。
+function stripImageSpec(md = '') {
+  const idx = md.search(/(\n-{3,}\s*)?\n#{1,6}\s*封面与配图要求/)
+  if (idx === -1) return md
+  return md.slice(0, idx).replace(/\s+$/, '') + '\n'
+}
+
 function loadArticle(filePath) {
   const md = readFileSync(filePath, 'utf8')
   const fm = parseFrontmatter(md)
@@ -114,8 +122,11 @@ async function processArticle(filePath, { rebuild = false } = {}) {
     clearImageCache(wd)
   }
 
-  // 1) 生成/复用 3 张图（传入正文，供封面嵌标题、插图嵌真实数据）
-  const imgs = await ensureImages({ title: fm.title, weekday: wd, type: fm.type, body })
+  // 1) 生成/复用 3 张图（传入正文+封面文案/概念，供封面做概念海报、插图嵌真实数据）
+  const imgs = await ensureImages({
+    title: fm.title, weekday: wd, type: fm.type, body,
+    coverText: fm.cover_text || '', coverConcept: fm.cover_concept || ''
+  })
 
   // 2) 上传封面 → thumb_media_id
   console.log(`   🖼️  上传封面`)
@@ -136,7 +147,7 @@ async function processArticle(filePath, { rebuild = false } = {}) {
     title: fm.title, weekday: fm.weekday, date: fm.date,
     type: fm.type, minutes
   })
-  const html = markdownToWxHtml(body, {
+  const html = markdownToWxHtml(stripImageSpec(body), {
     hero,
     figures: [
       { src: fig1.url, caption: '· 城市之间，差距藏在数据里 ·' },

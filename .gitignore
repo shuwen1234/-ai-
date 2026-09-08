@@ -3,3 +3,4 @@ node_modules/
 token_cache.json
 drafts_state.json
 images/
+*.zip
